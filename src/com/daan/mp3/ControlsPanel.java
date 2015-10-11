@@ -40,8 +40,7 @@ public class ControlsPanel extends JPanel {
 	private JLabel lblSongPicture = new JLabel();
 	private JLabel lblTime = new JLabel("00:00:00");
 	private JSlider slider = new JSlider();
-	private ScheduledExecutorService scheduledExecutor = Executors
-			.newSingleThreadScheduledExecutor();
+	private ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 	private Random random = new Random();
 
 	public ControlsPanel() {
@@ -54,11 +53,10 @@ public class ControlsPanel extends JPanel {
 		lblSongPicture.setSize(90, 90);
 		lblSongPicture.setLocation(5, 5);
 		SwingUtilities.invokeLater(new Runnable() {
-
+			
+			@Override
 			public void run() {
-				lblSongPicture.setIcon(resizeImage(new ImageIcon(
-						"pics/defaultalbumart.png"), lblSongPicture.getWidth(),
-						lblSongPicture.getHeight()));
+				lblSongPicture.setIcon(resizeImage(new ImageIcon("pics/defaultalbumart.png"), lblSongPicture.getWidth(), lblSongPicture.getHeight()));
 			}
 		});
 
@@ -80,13 +78,12 @@ public class ControlsPanel extends JPanel {
 
 		scheduledExecutor.scheduleAtFixedRate(new Runnable() {
 
+			@Override
 			public void run() {
 				if (vlcMediaPlayer.getMediaPlayer().isPlaying()) {
-					long timeInMillis = vlcMediaPlayer.getMediaPlayer()
-							.getTime();
+					long timeInMillis = vlcMediaPlayer.getMediaPlayer().getTime();
 					int timeInSeconds = Math.floorDiv((int) timeInMillis, 1000);
-					int sliderPosition = Math.round(vlcMediaPlayer
-							.getMediaPlayer().getPosition() * 1000f);
+					int sliderPosition = Math.round(vlcMediaPlayer.getMediaPlayer().getPosition() * 1000f);
 
 					updateTimeLabel(timeInSeconds);
 					updateSlider(sliderPosition);
@@ -96,13 +93,10 @@ public class ControlsPanel extends JPanel {
 		}, 0, 500, TimeUnit.MILLISECONDS);
 		slider.addMouseListener(new MouseListener() {
 
+			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (vlcMediaPlayer.getMediaPlayer().isPlayable()) {
-					long selectedTime = (int) Math.floor(((double) slider
-							.getValue() / 1000d)
-							* (double) vlcMediaPlayer.getMediaPlayer()
-									.getLength());
-
+					long selectedTime = (int) Math.floor(((double) slider.getValue() / 1000d) * (double) vlcMediaPlayer.getMediaPlayer().getLength());
 					vlcMediaPlayer.getMediaPlayer().setTime(selectedTime);
 					updateTimeLabel(Math.floorDiv((int) selectedTime, 1000));
 
@@ -110,33 +104,36 @@ public class ControlsPanel extends JPanel {
 				}
 			}
 
+			@Override
 			public void mousePressed(MouseEvent e) {
 				if (vlcMediaPlayer.getMediaPlayer().isPlaying()) {
 					vlcMediaPlayer.getMediaPlayer().pause();
 				}
 			}
 
+			@Override
 			public void mouseExited(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseEntered(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseClicked(MouseEvent e) {
 			}
 		});
 		slider.addMouseMotionListener(new MouseMotionListener() {
 
+
+			@Override
 			public void mouseMoved(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseDragged(MouseEvent e) {
-				if (vlcMediaPlayer.getMediaPlayer().isPlayable()
-						&& !vlcMediaPlayer.getMediaPlayer().isPlaying()) {
-					long selectedTime = (int) Math.floor(((double) slider
-							.getValue() / 1000d)
-							* (double) vlcMediaPlayer.getMediaPlayer()
-									.getLength());
+				if (vlcMediaPlayer.getMediaPlayer().isPlayable() && !vlcMediaPlayer.getMediaPlayer().isPlaying()) {
+					long selectedTime = (int) Math.floor(((double) slider.getValue() / 1000d) * (double) vlcMediaPlayer.getMediaPlayer().getLength());
 					updateTimeLabel(Math.floorDiv((int) selectedTime, 1000));
 				}
 			}
@@ -150,9 +147,7 @@ public class ControlsPanel extends JPanel {
 		int minutes = Math.floorDiv(seconds, 60);
 		seconds -= minutes * 60;
 
-		String timeString = ((hours < 10 ? "0" : "") + hours) + ":"
-				+ ((minutes < 10 ? "0" : "") + minutes) + ":"
-				+ ((seconds < 10 ? "0" : "") + seconds);
+		String timeString = ((hours < 10 ? "0" : "") + hours) + ":" + ((minutes < 10 ? "0" : "") + minutes) + ":" + ((seconds < 10 ? "0" : "") + seconds);
 		lblTime.setText(timeString);
 	}
 
@@ -163,9 +158,9 @@ public class ControlsPanel extends JPanel {
 	private void setSongPicture(final ImageIcon fileIcon) {
 		SwingUtilities.invokeLater(new Runnable() {
 
+			@Override
 			public void run() {
-				lblSongPicture.setIcon(resizeImage(fileIcon,
-						lblSongPicture.getWidth(), lblSongPicture.getHeight()));
+				lblSongPicture.setIcon(resizeImage(fileIcon, lblSongPicture.getWidth(), lblSongPicture.getHeight()));
 			}
 
 		});
@@ -173,8 +168,7 @@ public class ControlsPanel extends JPanel {
 
 	private ImageIcon resizeImage(ImageIcon icon, int width, int height) {
 		Image image = icon.getImage();
-		return new ImageIcon(image.getScaledInstance(width, height,
-				Image.SCALE_SMOOTH));
+		return new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH));
 	}
 
 	public void playSong(String locationPath) {
@@ -199,8 +193,7 @@ public class ControlsPanel extends JPanel {
 				return new ImageIcon((BufferedImage) artwork.get(
 						random.nextInt(artwork.size())).getImage());
 			}
-		} catch (CannotReadException | IOException | TagException
-				| ReadOnlyFileException | InvalidAudioFrameException e) {
+		} catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
 		}
 		return null;
 	}
