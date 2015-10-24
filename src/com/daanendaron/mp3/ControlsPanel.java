@@ -60,6 +60,7 @@ public class ControlsPanel extends JPanel {
 	private int rowPlaying = -1;
 
 	public ControlsPanel(SongsPanel pnlSongs, Main main) {
+		
 		this.main = pnlSongs;
 
 		setSize(1000, 100);
