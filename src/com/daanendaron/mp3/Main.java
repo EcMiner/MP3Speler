@@ -20,6 +20,10 @@ public class Main extends JFrame {
 	}
 
 	public static void main(String[] args) throws Exception {
+		System.out.println(System.getProperty("user.home"));
+
+		System.out.println(System.getProperty("os.name"));
+
 		if (!new NativeDiscovery().discover()) {
 			String vlcDir;
 
