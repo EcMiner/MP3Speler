@@ -27,7 +27,7 @@ public class LibraryManagerPanel extends JPanel {
 		this.main = main;
 
 		File mp3Folder = new File(System.getProperty("user.home")
-				+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "Library/Application Support") + "/MP3/");
+				+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "/Library/Application Support") + "/MP3/");
 
 		sql = new SQLite(new File(mp3Folder, "/filelocations.sql"));
 		sql.executeUpdate("CREATE TABLE IF NOT EXISTS filelocations(path varchar(255));");
