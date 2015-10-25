@@ -1,4 +1,4 @@
-package com.daanendaron.mp3;
+package com.daanendaron.mp3.panels;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -32,6 +32,10 @@ import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
+import com.daanendaron.mp3.Main;
+import com.daanendaron.mp3.MusicFile;
+import com.daanendaron.mp3.utilities.Utils;
+
 public class SongsPanel extends JPanel {
 
 	private static final long serialVersionUID = 7830875381072928952L;
@@ -39,16 +43,16 @@ public class SongsPanel extends JPanel {
 	private final ExecutorService executorService = Executors.newCachedThreadPool();
 
 	private JLabel lblSearch = new JLabel("Search:");
-	private JTextField search = new JTextField();
-	private JButton clearSearch = new JButton("Clear search field");
+	private JTextField fldSearch = new JTextField();
+	private JButton btnClearSearch = new JButton("Clear search field");
 	private JScrollPane pane = new JScrollPane();
 	protected JTable table = new JTable();
-	private ControlsPanel controlsPanel;
+	private ControlsPanel pnlControls;
 
 	private List<MusicFile> allSongs = new ArrayList<MusicFile>();
 
 	public SongsPanel(Main main) {
-		controlsPanel = new ControlsPanel(this, main);
+		pnlControls = new ControlsPanel(this, main);
 		setSize(1000, 700);
 		setLayout(null);
 
@@ -74,7 +78,8 @@ public class SongsPanel extends JPanel {
 		table.getColumn("Song name").setPreferredWidth((int) (table.getWidth() * .4));
 		table.getColumn("Artist").setPreferredWidth((int) (table.getWidth() * .3));
 		table.getColumn("Time").setPreferredWidth((int) (table.getWidth() * .1));
-		table.getColumn("Genre").setPreferredWidth((table.getWidth() - (table.getColumn("Song name").getPreferredWidth() + table.getColumn("Artist").getPreferredWidth() + table.getColumn("Time").getPreferredWidth())) - 3);
+		table.getColumn("Genre").setPreferredWidth((table.getWidth() - (table.getColumn("Song name").getPreferredWidth()
+				+ table.getColumn("Artist").getPreferredWidth() + table.getColumn("Time").getPreferredWidth())) - 3);
 		table.removeColumn(table.getColumn("PartOfFolder"));
 		table.removeColumn(table.getColumnModel().getColumn(4));
 		table.setBackground(new Color(255, 255, 255));
@@ -90,7 +95,7 @@ public class SongsPanel extends JPanel {
 				if (evt.getClickCount() == 2) {
 					String fileLocation = (String) table.getModel().getValueAt(row, 4);
 					File file = new File(fileLocation);
-					controlsPanel.playSong(file, row);
+					pnlControls.playSong(file, row);
 				}
 			}
 
@@ -113,9 +118,9 @@ public class SongsPanel extends JPanel {
 			});
 		}
 
-		search.setSize(600, 27);
-		search.setLocation(100, 0);
-		search.getDocument().addDocumentListener(new DocumentListener() {
+		fldSearch.setSize(600, 27);
+		fldSearch.setLocation(100, 0);
+		fldSearch.getDocument().addDocumentListener(new DocumentListener() {
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
@@ -134,15 +139,17 @@ public class SongsPanel extends JPanel {
 
 			private void searchSongs() {
 				DefaultTableModel model = (DefaultTableModel) table.getModel();
-				String searchString = search.getText().toLowerCase();
+				String searchString = fldSearch.getText().toLowerCase();
 				model.setRowCount(0);
 				for (MusicFile musicFileToSearch : allSongs) {
-					if ((musicFileToSearch.getSongName() != null && musicFileToSearch.getSongName().toLowerCase().contains(searchString)) || (musicFileToSearch.getArtist() != null && musicFileToSearch.getArtist().toLowerCase().contains(searchString))
+					if ((musicFileToSearch.getSongName() != null && musicFileToSearch.getSongName().toLowerCase().contains(searchString))
+							|| (musicFileToSearch.getArtist() != null && musicFileToSearch.getArtist().toLowerCase().contains(searchString))
 							|| (musicFileToSearch.getGenre() != null && musicFileToSearch.getGenre().toLowerCase().contains(searchString))) {
-						model.addRow(new Object[] { musicFileToSearch.getSongName(), musicFileToSearch.getArtist(), musicFileToSearch.getFormattedTime(), musicFileToSearch.getGenre(), musicFileToSearch.getFileLocation().getPath(), musicFileToSearch.isPartOfFolder() });
+						model.addRow(new Object[] { musicFileToSearch.getSongName(), musicFileToSearch.getArtist(), musicFileToSearch.getFormattedTime(),
+								musicFileToSearch.getGenre(), musicFileToSearch.getFileLocation().getPath(), musicFileToSearch.isPartOfFolder() });
 					}
 				}
-				controlsPanel.updateControlButtons();
+				pnlControls.updateControlButtons();
 			}
 
 		});
@@ -151,44 +158,35 @@ public class SongsPanel extends JPanel {
 		lblSearch.setLocation(10, 0);
 		lblSearch.setFont(lblSearch.getFont().deriveFont(18f));
 
-		clearSearch.setSize(250, 27);
-		clearSearch.setLocation(720, 0);
-		clearSearch.addMouseListener(new MouseAdapter() {
+		btnClearSearch.setSize(250, 27);
+		btnClearSearch.setLocation(720, 0);
+		btnClearSearch.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				search.setText("");
+				fldSearch.setText("");
 				model.setRowCount(0);
 				for (MusicFile musicFile : allSongs) {
-					model.addRow(new Object[] { musicFile.getSongName(), musicFile.getArtist(), musicFile.getFormattedTime(), musicFile.getGenre(), musicFile.getFileLocation().getPath(), musicFile.isPartOfFolder() });
+					model.addRow(new Object[] { musicFile.getSongName(), musicFile.getArtist(), musicFile.getFormattedTime(), musicFile.getGenre(),
+							musicFile.getFileLocation().getPath(), musicFile.isPartOfFolder() });
 				}
-				controlsPanel.updateControlButtons();
+				pnlControls.updateControlButtons();
 			}
 
 		});
 
 		add(pane);
-		add(search);
+		add(fldSearch);
 		add(lblSearch);
-		add(clearSearch);
-		add(controlsPanel);
+		add(btnClearSearch);
+		add(pnlControls);
 
 		setBackground(new Color(255, 255, 255));
 		setVisible(true);
-
-		// addSong(new File("C:\\Users\\daan\\Downloads\\Darude - Sandstorm(1).mp3"));
-		// controlsPanel.playSong("C:\\Users\\daan\\Downloads\\Three Days Grace - Life Starts Now (2009) (mrsjs)\\12-Life Starts Now.mp3");
-		// addSong(new File("C:\\Users\\daan\\Downloads\\Three Days Grace - Life Starts Now (2009) (mrsjs)\\12-Life Starts Now.mp3"));
-		// for (File file : new File("C:\\Users\\daan\\Downloads\\Three Days Grace - Life Starts Now (2009) (mrsjs)").listFiles()) {
-		// addSong(file);
-		// }
 	}
 
 	public void addSong(final File file, boolean isFolder) {
 		if (file != null) {
-			// System.out.println(file.getPath());
-			// System.out.println(new File("C:/Users/daan/Downloads/Three Days Grace - The Chain.mp3").getPath());
-			// System.out.println(file.getPath().equals(new File("C:/Users/daan/Downloads/Three Days Grace - The Chain.mp3").getPath()));
 			executorService.submit(new Runnable() {
 
 				@Override
@@ -198,7 +196,8 @@ public class SongsPanel extends JPanel {
 						AudioHeader header = f.getAudioHeader();
 						Tag tag = f.getTag();
 
-						String songName = tag.getFirst(FieldKey.TITLE) != "" ? tag.getFirst(FieldKey.TITLE) : file.getName().substring(0, file.getName().lastIndexOf('.'));
+						String songName = tag.getFirst(FieldKey.TITLE) != "" ? tag.getFirst(FieldKey.TITLE)
+								: file.getName().substring(0, file.getName().lastIndexOf('.'));
 						String artist = tag.getFirst(FieldKey.ARTIST) != "" ? tag.getFirst(FieldKey.ARTIST) : tag.getFirst(FieldKey.ALBUM_ARTIST);
 						String time = Utils.secondsToHoursMinutesSeconds(header.getTrackLength());
 						String genre = tag.getFirst(FieldKey.GENRE);
@@ -208,7 +207,7 @@ public class SongsPanel extends JPanel {
 							((DefaultTableModel) table.getModel()).addRow(new Object[] { songName, artist, time, genre, file.getPath(), isFolder });
 							allSongs.add(musicFile);
 						}
-						controlsPanel.updateControlButtons();
+						pnlControls.updateControlButtons();
 					} catch (Exception e) {
 						System.err.println("File is not an audio file!");
 					}
@@ -258,7 +257,7 @@ public class SongsPanel extends JPanel {
 				}
 			}
 			table.revalidate();
-			controlsPanel.updateControlButtons();
+			pnlControls.updateControlButtons();
 		}
 	}
 }

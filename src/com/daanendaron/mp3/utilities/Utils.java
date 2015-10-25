@@ -1,4 +1,4 @@
-package com.daanendaron.mp3;
+package com.daanendaron.mp3.utilities;
 
 import java.awt.Image;
 

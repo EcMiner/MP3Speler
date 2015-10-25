@@ -1,4 +1,4 @@
-package com.daanendaron.mp3;
+package com.daanendaron.mp3.utilities;
 
 import java.io.File;
 import java.io.IOException;

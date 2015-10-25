@@ -2,6 +2,8 @@ package com.daanendaron.mp3;
 
 import java.io.File;
 
+import com.daanendaron.mp3.utilities.Utils;
+
 public class MusicFile {
 
 	private final File fileLocation;

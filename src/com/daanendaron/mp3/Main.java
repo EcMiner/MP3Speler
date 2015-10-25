@@ -8,6 +8,9 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import com.daanendaron.mp3.panels.LibraryManagerPanel;
+import com.daanendaron.mp3.panels.SongsPanel;
+import com.daanendaron.mp3.utilities.DownloadUtils;
 import com.sun.jna.NativeLibrary;
 
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
@@ -49,7 +52,7 @@ public class Main extends JFrame {
 					DownloadUtils.downloadAndExtractZip(new URL(windows ? "https://www.dropbox.com/s/vncqql6jhx2dssx/vlc32win.zip?dl=1"
 							: "https://www.dropbox.com/s/a2fuze65tkzzo21/vlc32mac.zip?dl=1"), new File(vlc32.getParentFile(), "vlc32.zip"));
 
-					popup.close();
+					popup.closePopup();
 				}
 
 				// De installatie locatie van VLC definiëren 
@@ -68,7 +71,7 @@ public class Main extends JFrame {
 					DownloadUtils.downloadAndExtractZip(new URL(windows ? "https://www.dropbox.com/s/p3pyl0p85ig7jgd/vlc64win.zip?dl=1"
 							: "https://www.dropbox.com/s/ugvo248btwelq9y/vlc64mac.zip?dl=1"), new File(vlc64.getParentFile(), "vlc64.zip"));
 
-					popup.close();
+					popup.closePopup();
 				}
 
 				// De installatie locatie van VLC definiëren 
@@ -85,8 +88,8 @@ public class Main extends JFrame {
 		new Main();
 	}
 
-	protected SongsPanel pnlSongs = new SongsPanel(this);
-	protected LibraryManagerPanel pnlLibraryManager = new LibraryManagerPanel(this);
+	public SongsPanel pnlSongs = new SongsPanel(this);
+	private LibraryManagerPanel pnlLibraryManager = new LibraryManagerPanel(this);
 
 	public Main() {
 		setSize(1000, 700);

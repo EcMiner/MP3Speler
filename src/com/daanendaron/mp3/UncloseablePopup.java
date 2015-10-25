@@ -19,14 +19,14 @@ public class UncloseablePopup extends JFrame {
 
 		setLayout(new BorderLayout(0, 10));
 
-		JLabel label = new JLabel(message);
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		add(label, BorderLayout.CENTER);
+		JLabel lblMessage = new JLabel(message);
+		lblMessage.setHorizontalAlignment(SwingConstants.CENTER);
+		add(lblMessage, BorderLayout.CENTER);
 
 		setVisible(true);
 	}
 
-	public void close() {
+	public void closePopup() {
 		dispose();
 	}
 

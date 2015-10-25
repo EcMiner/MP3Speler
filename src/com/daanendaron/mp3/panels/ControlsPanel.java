@@ -1,4 +1,4 @@
-package com.daanendaron.mp3;
+package com.daanendaron.mp3.panels;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -32,6 +32,9 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.images.Artwork;
 
+import com.daanendaron.mp3.Main;
+import com.daanendaron.mp3.utilities.Utils;
+
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.MediaPlayer;
@@ -41,14 +44,14 @@ public class ControlsPanel extends JPanel {
 
 	private static final long serialVersionUID = -2917297485031219158L;
 
-	private final SongsPanel main;
+	private final SongsPanel pnlSongs;
 
 	private EmbeddedMediaPlayerComponent vlcMediaPlayer = new EmbeddedMediaPlayerComponent();
 	private JLabel lblSongPicture = new JLabel();
 	private JLabel lblTime = new JLabel("00:00:00");
 	private JSlider slider = new JSlider();
 	private ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-	private Random random = new Random();
+	private Random randomGenerator = new Random();
 
 	private JButton btnPreviousSong = new JButton(Utils.resizeImage(new ImageIcon(Main.getResource("pics/prevbutton.png")), 45, 45));
 	private JButton btnPausePlaySong = new JButton(Utils.resizeImage(new ImageIcon(Main.getResource("pics/playbutton.png")), 70, 70));
@@ -59,11 +62,10 @@ public class ControlsPanel extends JPanel {
 	private JLabel lblArtist = new JLabel();
 
 	private int rowPlaying = -1;
-	private boolean playing = false;
+	private boolean isMusicPlaying = false;
 
 	public ControlsPanel(SongsPanel pnlSongs, Main main) {
-
-		this.main = pnlSongs;
+		this.pnlSongs = pnlSongs;
 
 		setSize(1000, 100);
 		setLocation(0, 570);
@@ -220,27 +222,27 @@ public class ControlsPanel extends JPanel {
 
 			@Override
 			public void mediaChanged(MediaPlayer mediaPlayer, libvlc_media_t media, String mrl) {
-				playing = true;
+				isMusicPlaying = true;
 			}
 
 			@Override
 			public void playing(MediaPlayer mediaPlayer) {
-				playing = true;
+				isMusicPlaying = true;
 			}
 
 			@Override
 			public void stopped(MediaPlayer mediaPlayer) {
-				playing = false;
+				isMusicPlaying = false;
 			}
 
 			@Override
 			public void paused(MediaPlayer mediaPlayer) {
-				playing = false;
+				isMusicPlaying = false;
 			}
 
 			@Override
 			public void finished(MediaPlayer mediaPlayer) {
-				playing = false;
+				isMusicPlaying = false;
 				updateSlider(1000);
 				if (canPlayNextSong()) {
 					playNextSong();
@@ -283,7 +285,7 @@ public class ControlsPanel extends JPanel {
 				setSongPicture(new ImageIcon(Main.getResource("pics/defaultalbumart.png")));
 			slider.setEnabled(true);
 
-			DefaultTableModel model = (DefaultTableModel) main.table.getModel();
+			DefaultTableModel model = (DefaultTableModel) pnlSongs.table.getModel();
 			lblSongTitle.setText((String) model.getValueAt(rowPlaying, 0));
 			lblArtist.setText((String) model.getValueAt(rowPlaying, 1));
 
@@ -297,7 +299,7 @@ public class ControlsPanel extends JPanel {
 
 				@Override
 				public void run() {
-					if (playing)
+					if (isMusicPlaying)
 						btnPausePlaySong.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/pausebutton.png")),
 								btnPausePlaySong.getIcon().getIconWidth(), btnPausePlaySong.getIcon().getIconHeight()));
 					else
@@ -328,24 +330,24 @@ public class ControlsPanel extends JPanel {
 
 	private void playNextSong() {
 		if (canPlayNextSong()) {
-			playSong(new File((String) ((DefaultTableModel) main.table.getModel()).getValueAt(rowPlaying + 1, 4)), rowPlaying + 1);
-			main.table.setRowSelectionInterval(rowPlaying, rowPlaying);
+			playSong(new File((String) ((DefaultTableModel) pnlSongs.table.getModel()).getValueAt(rowPlaying + 1, 4)), rowPlaying + 1);
+			pnlSongs.table.setRowSelectionInterval(rowPlaying, rowPlaying);
 		}
 	}
 
 	private void playPreviousSong() {
 		if (canPlayPreviousSong()) {
-			playSong(new File((String) ((DefaultTableModel) main.table.getModel()).getValueAt(rowPlaying - 1, 4)), rowPlaying - 1);
-			main.table.setRowSelectionInterval(rowPlaying, rowPlaying);
+			playSong(new File((String) ((DefaultTableModel) pnlSongs.table.getModel()).getValueAt(rowPlaying - 1, 4)), rowPlaying - 1);
+			pnlSongs.table.setRowSelectionInterval(rowPlaying, rowPlaying);
 		}
 	}
 
 	private boolean canPlayNextSong() {
-		return rowPlaying >= 0 && rowPlaying < main.table.getRowCount() - 1;
+		return rowPlaying >= 0 && rowPlaying < pnlSongs.table.getRowCount() - 1;
 	}
 
 	private boolean canPlayPreviousSong() {
-		return rowPlaying >= 1 && rowPlaying <= main.table.getRowCount();
+		return rowPlaying >= 1 && rowPlaying <= pnlSongs.table.getRowCount();
 	}
 
 	public ImageIcon getSongArtWork(File songFile) {
@@ -354,7 +356,7 @@ public class ControlsPanel extends JPanel {
 			Tag tag = f.getTag();
 			List<Artwork> artwork = tag.getArtworkList();
 			if (artwork.size() > 0) {
-				return new ImageIcon((BufferedImage) artwork.get(random.nextInt(artwork.size())).getImage());
+				return new ImageIcon((BufferedImage) artwork.get(randomGenerator.nextInt(artwork.size())).getImage());
 			}
 		} catch (CannotReadException | IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException e) {
 		}

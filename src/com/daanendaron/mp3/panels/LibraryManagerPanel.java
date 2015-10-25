@@ -1,4 +1,4 @@
-package com.daanendaron.mp3;
+package com.daanendaron.mp3.panels;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -16,6 +16,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.daanendaron.mp3.Main;
+import com.daanendaron.mp3.MyTableModel;
+import com.daanendaron.mp3.SQLite;
+import com.daanendaron.mp3.utilities.Utils;
 
 @SuppressWarnings("serial")
 public class LibraryManagerPanel extends JPanel {
