@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -26,11 +25,11 @@ public class LibraryManagerPanel extends JPanel {
 
 	public LibraryManagerPanel(Main main) {
 		this.main = main;
-		try {
-			sql = new SQLite(new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParent(), "/filelocations.sql"));
-		} catch (URISyntaxException ex) {
-			ex.printStackTrace();
-		}
+
+		File mp3Folder = new File(System.getProperty("user.home")
+				+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "Library/Application Support") + "/MP3/");
+
+		sql = new SQLite(new File(mp3Folder, "/filelocations.sql"));
 		sql.executeUpdate("CREATE TABLE IF NOT EXISTS filelocations(path varchar(255));");
 
 		setSize(1000, 700);
@@ -78,7 +77,7 @@ public class LibraryManagerPanel extends JPanel {
 						@Override
 						public boolean accept(File dir, String name) {
 							String extension = name.substring(name.lastIndexOf('.') + 1, name.length());
-							return extension.equalsIgnoreCase("mp3") || extension.equalsIgnoreCase("ogg") || extension.equalsIgnoreCase("wav");
+							return Main.supportedFormats.contains(extension.toLowerCase());
 						}
 					})) {
 						main.pnlSongs.addSong(song, true);
@@ -152,7 +151,8 @@ public class LibraryManagerPanel extends JPanel {
 	}
 
 	public JFileChooser initfilechooser(JFrame folderselectorframe) {
-		FileNameExtensionFilter audiofiles = new FileNameExtensionFilter("Audio Files", "mp3", "wav", "ogg");
+		FileNameExtensionFilter audiofiles = new FileNameExtensionFilter("Audio Files",
+				Main.supportedFormats.toArray(new String[Main.supportedFormats.size()]));
 		JFileChooser mp3folderselector = new JFileChooser(System.getProperty("user.home") + System.getProperty("file.separator") + "Music");
 		mp3folderselector.setControlButtonsAreShown(true);
 		mp3folderselector.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -191,7 +191,7 @@ public class LibraryManagerPanel extends JPanel {
 					@Override
 					public boolean accept(File dir, String name) {
 						String extension = name.substring(name.lastIndexOf('.') + 1, name.length());
-						return extension.equalsIgnoreCase("mp3") || extension.equalsIgnoreCase("ogg") || extension.equalsIgnoreCase("wav");
+						return Main.supportedFormats.contains(extension.toLowerCase());
 					}
 				})) {
 					main.pnlSongs.addSong(song, true);

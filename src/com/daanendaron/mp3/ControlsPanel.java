@@ -32,6 +32,7 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.images.Artwork;
 
+import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -58,9 +59,10 @@ public class ControlsPanel extends JPanel {
 	private JLabel lblArtist = new JLabel();
 
 	private int rowPlaying = -1;
+	private boolean playing = false;
 
 	public ControlsPanel(SongsPanel pnlSongs, Main main) {
-		
+
 		this.main = pnlSongs;
 
 		setSize(1000, 100);
@@ -74,7 +76,8 @@ public class ControlsPanel extends JPanel {
 
 			@Override
 			public void run() {
-				lblSongPicture.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/defaultalbumart.png")), lblSongPicture.getWidth(), lblSongPicture.getHeight()));
+				lblSongPicture.setIcon(
+						Utils.resizeImage(new ImageIcon(Main.getResource("pics/defaultalbumart.png")), lblSongPicture.getWidth(), lblSongPicture.getHeight()));
 			}
 		});
 
@@ -114,16 +117,11 @@ public class ControlsPanel extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 				if (vlcMediaPlayer.getMediaPlayer().isPlaying()) {
 					vlcMediaPlayer.getMediaPlayer().pause();
-					System.out.println("Update 1");
 					updateControlButtons();
 				} else if (vlcMediaPlayer.getMediaPlayer().isPlayable()) {
 					vlcMediaPlayer.getMediaPlayer().start();
-					System.out.println("Update 2");
 					updateControlButtons();
 				}
-				System.out.println("canPause: " + vlcMediaPlayer.getMediaPlayer().canPause());
-				System.out.println("isPlayable: " + vlcMediaPlayer.getMediaPlayer().isPlayable());
-				System.out.println("isPlaying: " + vlcMediaPlayer.getMediaPlayer().isPlaying());
 			}
 
 		});
@@ -196,7 +194,6 @@ public class ControlsPanel extends JPanel {
 					updateTimeLabel(Math.floorDiv((int) selectedTime, 1000));
 
 					vlcMediaPlayer.getMediaPlayer().start();
-					System.out.println("Update 3");
 					updateControlButtons();
 				}
 			}
@@ -205,7 +202,6 @@ public class ControlsPanel extends JPanel {
 			public void mousePressed(MouseEvent e) {
 				if (vlcMediaPlayer.getMediaPlayer().isPlaying()) {
 					vlcMediaPlayer.getMediaPlayer().pause();
-					System.out.println("Update 4");
 					updateControlButtons();
 				}
 			}
@@ -223,11 +219,32 @@ public class ControlsPanel extends JPanel {
 		vlcMediaPlayer.getMediaPlayer().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
 
 			@Override
+			public void mediaChanged(MediaPlayer mediaPlayer, libvlc_media_t media, String mrl) {
+				playing = true;
+			}
+
+			@Override
+			public void playing(MediaPlayer mediaPlayer) {
+				playing = true;
+			}
+
+			@Override
+			public void stopped(MediaPlayer mediaPlayer) {
+				playing = false;
+			}
+
+			@Override
+			public void paused(MediaPlayer mediaPlayer) {
+				playing = false;
+			}
+
+			@Override
 			public void finished(MediaPlayer mediaPlayer) {
+				playing = false;
+				updateSlider(1000);
 				if (canPlayNextSong()) {
 					playNextSong();
 				} else {
-					System.out.println("Update 6");
 					updateControlButtons();
 				}
 			}
@@ -259,8 +276,6 @@ public class ControlsPanel extends JPanel {
 			this.rowPlaying = rowPlaying;
 			vlcMediaPlayer.getMediaPlayer().stop();
 			vlcMediaPlayer.getMediaPlayer().playMedia(file.getAbsolutePath());
-			System.out.println(vlcMediaPlayer.getMediaPlayer().isPlaying());
-			System.out.println(vlcMediaPlayer.getMediaPlayer().isMediaParsed());
 			ImageIcon fileIcon = getSongArtWork(file);
 			if (fileIcon != null)
 				setSongPicture(fileIcon);
@@ -282,15 +297,12 @@ public class ControlsPanel extends JPanel {
 
 				@Override
 				public void run() {
-					try {
-						Thread.sleep(20);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					if (vlcMediaPlayer.getMediaPlayer().isPlaying())
-						btnPausePlaySong.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/pausebutton.png")), btnPausePlaySong.getIcon().getIconWidth(), btnPausePlaySong.getIcon().getIconHeight()));
+					if (playing)
+						btnPausePlaySong.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/pausebutton.png")),
+								btnPausePlaySong.getIcon().getIconWidth(), btnPausePlaySong.getIcon().getIconHeight()));
 					else
-						btnPausePlaySong.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/playbutton.png")), btnPausePlaySong.getIcon().getIconWidth(), btnPausePlaySong.getIcon().getIconHeight()));
+						btnPausePlaySong.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/playbutton.png")),
+								btnPausePlaySong.getIcon().getIconWidth(), btnPausePlaySong.getIcon().getIconHeight()));
 					btnPausePlaySong.setEnabled(true);
 					btnPreviousSong.setEnabled(canPlayPreviousSong());
 					btnNextSong.setEnabled(canPlayNextSong());
@@ -302,7 +314,8 @@ public class ControlsPanel extends JPanel {
 
 				@Override
 				public void run() {
-					btnPausePlaySong.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/playbutton.png")), btnPausePlaySong.getIcon().getIconWidth(), btnPausePlaySong.getIcon().getIconHeight()));
+					btnPausePlaySong.setIcon(Utils.resizeImage(new ImageIcon(Main.getResource("pics/playbutton.png")),
+							btnPausePlaySong.getIcon().getIconWidth(), btnPausePlaySong.getIcon().getIconHeight()));
 					btnPausePlaySong.setEnabled(false);
 					btnPreviousSong.setEnabled(false);
 					btnNextSong.setEnabled(false);
