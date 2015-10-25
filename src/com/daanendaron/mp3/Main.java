@@ -32,7 +32,7 @@ public class Main extends JFrame {
 
 			if (System.getProperty("sun.arch.data.model").equals("32")) {
 				File vlc32 = new File(System.getProperty("user.home")
-						+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "Library/Application Support") + "/MP3/vlc32");
+						+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "/Library/Application Support") + "/MP3/vlc32");
 
 				System.out.println(vlc32.getAbsolutePath());
 				
@@ -48,7 +48,7 @@ public class Main extends JFrame {
 				vlcDir = vlc32.getAbsolutePath();
 			} else {
 				File vlc64 = new File(System.getProperty("user.home")
-						+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "Library/Application Support") + "/MP3/vlc64");
+						+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "/Library/Application Support") + "/MP3/vlc64");
 
 				System.out.println(vlc64.getAbsolutePath());
 				
