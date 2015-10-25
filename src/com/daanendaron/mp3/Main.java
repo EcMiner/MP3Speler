@@ -27,41 +27,56 @@ public class Main extends JFrame {
 
 		System.out.println(System.getProperty("os.name"));
 
+		// Kijken of VLC al geinstalleerd is
 		if (!new NativeDiscovery().discover()) {
 			String vlcDir;
 
+			// Kijken of de computer een windows machine is.
 			boolean windows = System.getProperty("os.name").startsWith("Windows");
 
+			// Bepalen of er 32 of 64 bit Java wordt gebruikt
 			if (System.getProperty("sun.arch.data.model").equals("32")) {
+				// De installatie folder bepalen (Windows: ~\AppData\Roaming\MP3Speler\vlc32, MAC: ~/Library/Application Support/MP3Speler/vlc32
 				File vlc32 = new File(System.getProperty("user.home") + (windows ? "/AppData/Roaming" : "/Library/Application Support") + "/MP3/vlc32");
 
 				System.out.println(vlc32.getAbsolutePath());
 
 				if (!vlc32.exists()) {
+					// Een popup openen om te laten weten dat VLC wordt gedownload
 					UncloseablePopup popup = new UncloseablePopup(250, 100, "Please wait while we setup VLC");
 
-					DownloadUtils.downloadAndExtractZip(new URL(windows ? "https://www.dropbox.com/s/vncqql6jhx2dssx/vlc32win.zip?dl=1" : "https://www.dropbox.com/s/a2fuze65tkzzo21/vlc32mac.zip?dl=1"), new File(vlc32.getParentFile(), "vlc32.zip"));
+					// 32 bit vlc downloaden voor windows of mac.
+					DownloadUtils.downloadAndExtractZip(new URL(windows ? "https://www.dropbox.com/s/vncqql6jhx2dssx/vlc32win.zip?dl=1"
+							: "https://www.dropbox.com/s/a2fuze65tkzzo21/vlc32mac.zip?dl=1"), new File(vlc32.getParentFile(), "vlc32.zip"));
 
 					popup.close();
 				}
 
+				// De installatie locatie van VLC definiëren 
 				vlcDir = windows ? vlc32.getAbsolutePath() : vlc32.getAbsolutePath() + "/lib/";
 			} else {
+				// De installatie folder bepalen (Windows: ~\AppData\Roaming\MP3Speler\vlc64, MAC: ~/Library/Application Support/MP3Speler/vlc64
 				File vlc64 = new File(System.getProperty("user.home") + (windows ? "/AppData/Roaming" : "/Library/Application Support") + "/MP3/vlc64");
 
 				System.out.println(vlc64.getAbsolutePath());
 
 				if (!vlc64.exists()) {
+					// Een popup openen om te laten weten dat VLC wordt gedownload
 					UncloseablePopup popup = new UncloseablePopup(250, 100, "Please wait while we setup VLC");
 
-					DownloadUtils.downloadAndExtractZip(new URL(windows ? "https://www.dropbox.com/s/p3pyl0p85ig7jgd/vlc64win.zip?dl=1" : "https://www.dropbox.com/s/ugvo248btwelq9y/vlc64mac.zip?dl=1"), new File(vlc64.getParentFile(), "vlc64.zip"));
+					// 64 bit vlc downloaden voor windows of mac.
+					DownloadUtils.downloadAndExtractZip(new URL(windows ? "https://www.dropbox.com/s/p3pyl0p85ig7jgd/vlc64win.zip?dl=1"
+							: "https://www.dropbox.com/s/ugvo248btwelq9y/vlc64mac.zip?dl=1"), new File(vlc64.getParentFile(), "vlc64.zip"));
 
 					popup.close();
 				}
 
+				// De installatie locatie van VLC definiëren 
 				vlcDir = windows ? vlc64.getAbsolutePath() : vlc64.getAbsolutePath() + "/lib/";
 			}
 			System.out.println(vlcDir);
+			
+			// De installatie locatie van VLC instellen, anders werkt de VLCJ library niet.
 			NativeLibrary.addSearchPath(RuntimeUtil.getLibVlcLibraryName(), vlcDir);
 		} else {
 			System.out.println("Found VLC installed");

@@ -129,7 +129,7 @@ public class LibraryManagerPanel extends JPanel {
 
 		JButton btnBack = new JButton("Back");
 		btnBack.setSize(100, pnlControls.getHeight());
-		btnBack.setLocation(getWidth() - btnBack.getWidth(), 0);
+		btnBack.setLocation(getWidth() - btnBack.getWidth() - 7, 0);
 		btnBack.setToolTipText("Go back to the library");
 		btnBack.addActionListener(new ActionListener() {
 
