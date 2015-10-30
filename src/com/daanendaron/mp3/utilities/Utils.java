@@ -15,11 +15,10 @@ public class Utils {
 
 		return ((hours < 10 ? "0" : "") + hours) + ":" + ((minutes < 10 ? "0" : "") + minutes) + ":" + ((seconds < 10 ? "0" : "") + seconds);
 	}
-	
+
 	public static ImageIcon resizeImage(ImageIcon icon, int width, int height) {
 		Image image = icon.getImage();
 		return new ImageIcon(image.getScaledInstance(width, height, Image.SCALE_SMOOTH));
 	}
-
 
 }

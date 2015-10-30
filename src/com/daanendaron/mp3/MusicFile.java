@@ -9,18 +9,18 @@ public class MusicFile {
 	private final File fileLocation;
 	private final String songName;
 	private final String artist;
-	private final int time;
+	private final int durationInSeconds;
 	private final String genre;
-	private final String formattedTime;
+	private final String durationHoursMinutesSeconds;
 	private final boolean isPartOfFolder;
 
 	public MusicFile(File fileLocation, String songName, String artist, int time, String genre, boolean isPartOfFolder) {
 		this.fileLocation = fileLocation;
 		this.songName = songName;
 		this.artist = artist;
-		this.time = time;
+		this.durationInSeconds = time;
 		this.genre = genre;
-		this.formattedTime = Utils.secondsToHoursMinutesSeconds(time);
+		this.durationHoursMinutesSeconds = Utils.secondsToHoursMinutesSeconds(time);
 		this.isPartOfFolder = isPartOfFolder;
 	}
 
@@ -36,16 +36,16 @@ public class MusicFile {
 		return artist;
 	}
 
-	public int getTime() {
-		return time;
+	public int getDurationInSeconds() {
+		return durationInSeconds;
 	}
 
 	public String getGenre() {
 		return genre;
 	}
 
-	public String getFormattedTime() {
-		return formattedTime;
+	public String getDurationHoursMinutesSeconds() {
+		return durationHoursMinutesSeconds;
 	}
 
 	public boolean isPartOfFolder() {
@@ -59,7 +59,7 @@ public class MusicFile {
 			if ((fileLocation == null && other.fileLocation == null) || ((fileLocation != null && other.fileLocation != null) && (fileLocation.getPath().equals(other.fileLocation.getPath())))) {
 				if ((songName == null && other.songName == null) || ((songName != null && other.songName != null) && (songName.equals(other.songName)))) {
 					if ((artist == null && other.artist == null) || ((artist != null && other.artist != null) && (artist.equals(other.artist)))) {
-						if (time == other.time) {
+						if (durationInSeconds == other.durationInSeconds) {
 							if ((genre == null && other.genre == null) || ((genre != null && other.genre != null) && (genre.equals(other.genre)))) {
 								return isPartOfFolder == other.isPartOfFolder;
 							}

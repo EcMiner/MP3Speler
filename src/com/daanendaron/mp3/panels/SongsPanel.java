@@ -40,13 +40,13 @@ public class SongsPanel extends JPanel {
 
 	private static final long serialVersionUID = 7830875381072928952L;
 
-	private final ExecutorService executorService = Executors.newCachedThreadPool();
+	private final ExecutorService execAsync = Executors.newCachedThreadPool();
 
 	private JLabel lblSearch = new JLabel("Search:");
 	private JTextField fldSearch = new JTextField();
 	private JButton btnClearSearch = new JButton("Clear search field");
-	private JScrollPane pane = new JScrollPane();
-	protected JTable table = new JTable();
+	private JScrollPane jspTableScrollPane = new JScrollPane();
+	protected JTable tblSongsTable = new JTable();
 	private ControlsPanel pnlControls;
 
 	private List<MusicFile> allSongs = new ArrayList<MusicFile>();
@@ -56,12 +56,12 @@ public class SongsPanel extends JPanel {
 		setSize(1000, 700);
 		setLayout(null);
 
-		pane.setViewportView(table);
-		pane.getViewport().setBackground(Color.WHITE);
-		pane.setSize(995, 540);
-		pane.setLocation(0, 30);
-		pane.setBackground(new Color(255, 255, 255));
-		pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		jspTableScrollPane.setViewportView(tblSongsTable);
+		jspTableScrollPane.getViewport().setBackground(Color.WHITE);
+		jspTableScrollPane.setSize(995, 540);
+		jspTableScrollPane.setLocation(0, 30);
+		jspTableScrollPane.setBackground(new Color(255, 255, 255));
+		jspTableScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
 		DefaultTableModel model = new DefaultTableModel(new Object[] { "Song name", "Artist", "Time", "Genre", "FileLocation", "PartOfFolder" }, 0) {
 
@@ -72,37 +72,38 @@ public class SongsPanel extends JPanel {
 				return false;
 			}
 		};
-		table.setSize(pane.getWidth(), pane.getHeight());
-		table.setModel(model);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		table.getColumn("Song name").setPreferredWidth((int) (table.getWidth() * .4));
-		table.getColumn("Artist").setPreferredWidth((int) (table.getWidth() * .3));
-		table.getColumn("Time").setPreferredWidth((int) (table.getWidth() * .1));
-		table.getColumn("Genre").setPreferredWidth((table.getWidth() - (table.getColumn("Song name").getPreferredWidth()
-				+ table.getColumn("Artist").getPreferredWidth() + table.getColumn("Time").getPreferredWidth())) - 3);
-		table.removeColumn(table.getColumn("PartOfFolder"));
-		table.removeColumn(table.getColumnModel().getColumn(4));
-		table.setBackground(new Color(255, 255, 255));
-		table.getTableHeader().setBackground(Color.white);
-		table.setRowHeight(25);
-		table.getTableHeader().setReorderingAllowed(false);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.addMouseListener(new MouseAdapter() {
+		tblSongsTable.setSize(jspTableScrollPane.getWidth(), jspTableScrollPane.getHeight());
+		tblSongsTable.setModel(model);
+		tblSongsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		tblSongsTable.getColumn("Song name").setPreferredWidth((int) (tblSongsTable.getWidth() * .4));
+		tblSongsTable.getColumn("Artist").setPreferredWidth((int) (tblSongsTable.getWidth() * .3));
+		tblSongsTable.getColumn("Time").setPreferredWidth((int) (tblSongsTable.getWidth() * .1));
+		tblSongsTable.getColumn("Genre").setPreferredWidth((tblSongsTable.getWidth() - (tblSongsTable.getColumn("Song name").getPreferredWidth() + tblSongsTable.getColumn("Artist").getPreferredWidth() + tblSongsTable.getColumn("Time").getPreferredWidth())) - 3);
+		tblSongsTable.removeColumn(tblSongsTable.getColumn("PartOfFolder"));
+		tblSongsTable.removeColumn(tblSongsTable.getColumnModel().getColumn(4));
+		tblSongsTable.setBackground(new Color(255, 255, 255));
+		tblSongsTable.getTableHeader().setBackground(Color.white);
+		tblSongsTable.setRowHeight(25);
+		tblSongsTable.getTableHeader().setReorderingAllowed(false);
+		tblSongsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tblSongsTable.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mousePressed(MouseEvent evt) {
-				int row = table.rowAtPoint(evt.getPoint());
+				int row = tblSongsTable.rowAtPoint(evt.getPoint());
 				if (evt.getClickCount() == 2) {
-					String fileLocation = (String) table.getModel().getValueAt(row, 4);
+					String fileLocation = (String) tblSongsTable.getModel().getValueAt(row, 4);
 					File file = new File(fileLocation);
 					pnlControls.playSong(file, row);
+				} else if (evt.getClickCount() == 1) {
+					pnlControls.btnPausePlaySong.setEnabled(true);
 				}
 			}
 
 		});
 
-		for (int i = 0; i < table.getColumnCount(); i++) {
-			TableColumn column = table.getColumnModel().getColumn(i);
+		for (int i = 0; i < tblSongsTable.getColumnCount(); i++) {
+			TableColumn column = tblSongsTable.getColumnModel().getColumn(i);
 			column.setResizable(false);
 			column.setCellRenderer(new DefaultTableCellRenderer() {
 
@@ -138,15 +139,13 @@ public class SongsPanel extends JPanel {
 			}
 
 			private void searchSongs() {
-				DefaultTableModel model = (DefaultTableModel) table.getModel();
+				DefaultTableModel model = (DefaultTableModel) tblSongsTable.getModel();
 				String searchString = fldSearch.getText().toLowerCase();
 				model.setRowCount(0);
 				for (MusicFile musicFileToSearch : allSongs) {
-					if ((musicFileToSearch.getSongName() != null && musicFileToSearch.getSongName().toLowerCase().contains(searchString))
-							|| (musicFileToSearch.getArtist() != null && musicFileToSearch.getArtist().toLowerCase().contains(searchString))
+					if ((musicFileToSearch.getSongName() != null && musicFileToSearch.getSongName().toLowerCase().contains(searchString)) || (musicFileToSearch.getArtist() != null && musicFileToSearch.getArtist().toLowerCase().contains(searchString))
 							|| (musicFileToSearch.getGenre() != null && musicFileToSearch.getGenre().toLowerCase().contains(searchString))) {
-						model.addRow(new Object[] { musicFileToSearch.getSongName(), musicFileToSearch.getArtist(), musicFileToSearch.getFormattedTime(),
-								musicFileToSearch.getGenre(), musicFileToSearch.getFileLocation().getPath(), musicFileToSearch.isPartOfFolder() });
+						model.addRow(new Object[] { musicFileToSearch.getSongName(), musicFileToSearch.getArtist(), musicFileToSearch.getDurationHoursMinutesSeconds(), musicFileToSearch.getGenre(), musicFileToSearch.getFileLocation().getPath(), musicFileToSearch.isPartOfFolder() });
 					}
 				}
 				pnlControls.updateControlButtons();
@@ -167,15 +166,14 @@ public class SongsPanel extends JPanel {
 				fldSearch.setText("");
 				model.setRowCount(0);
 				for (MusicFile musicFile : allSongs) {
-					model.addRow(new Object[] { musicFile.getSongName(), musicFile.getArtist(), musicFile.getFormattedTime(), musicFile.getGenre(),
-							musicFile.getFileLocation().getPath(), musicFile.isPartOfFolder() });
+					model.addRow(new Object[] { musicFile.getSongName(), musicFile.getArtist(), musicFile.getDurationHoursMinutesSeconds(), musicFile.getGenre(), musicFile.getFileLocation().getPath(), musicFile.isPartOfFolder() });
 				}
 				pnlControls.updateControlButtons();
 			}
 
 		});
 
-		add(pane);
+		add(jspTableScrollPane);
 		add(fldSearch);
 		add(lblSearch);
 		add(btnClearSearch);
@@ -185,9 +183,9 @@ public class SongsPanel extends JPanel {
 		setVisible(true);
 	}
 
-	public void addSong(final File file, boolean isFolder) {
+	public void addSongToTable(final File file, boolean isFolder) {
 		if (file != null) {
-			executorService.submit(new Runnable() {
+			execAsync.submit(new Runnable() {
 
 				@Override
 				public void run() {
@@ -196,15 +194,14 @@ public class SongsPanel extends JPanel {
 						AudioHeader header = f.getAudioHeader();
 						Tag tag = f.getTag();
 
-						String songName = tag.getFirst(FieldKey.TITLE) != "" ? tag.getFirst(FieldKey.TITLE)
-								: file.getName().substring(0, file.getName().lastIndexOf('.'));
+						String songName = tag.getFirst(FieldKey.TITLE) != "" ? tag.getFirst(FieldKey.TITLE) : file.getName().substring(0, file.getName().lastIndexOf('.'));
 						String artist = tag.getFirst(FieldKey.ARTIST) != "" ? tag.getFirst(FieldKey.ARTIST) : tag.getFirst(FieldKey.ALBUM_ARTIST);
 						String time = Utils.secondsToHoursMinutesSeconds(header.getTrackLength());
 						String genre = tag.getFirst(FieldKey.GENRE);
 
 						MusicFile musicFile = new MusicFile(file, songName, artist, header.getTrackLength(), genre, isFolder);
 						if (!allSongs.contains(musicFile)) {
-							((DefaultTableModel) table.getModel()).addRow(new Object[] { songName, artist, time, genre, file.getPath(), isFolder });
+							((DefaultTableModel) tblSongsTable.getModel()).addRow(new Object[] { songName, artist, time, genre, file.getPath(), isFolder });
 							allSongs.add(musicFile);
 						}
 						pnlControls.updateControlButtons();
@@ -218,7 +215,7 @@ public class SongsPanel extends JPanel {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void removeSong(final File file) {
+	public void removeSongFromTable(final File file) {
 		if (file != null) {
 			if (file.isDirectory()) {
 				Iterator<MusicFile> iterator = allSongs.iterator();
@@ -233,7 +230,7 @@ public class SongsPanel extends JPanel {
 					}
 				}
 			}
-			Iterator<Vector<Object>> it = ((DefaultTableModel) table.getModel()).getDataVector().iterator();
+			Iterator<Vector<Object>> it = ((DefaultTableModel) tblSongsTable.getModel()).getDataVector().iterator();
 			while (it.hasNext()) {
 				Vector<Object> v = it.next();
 				boolean partOfFolder = (boolean) v.get(5);
@@ -256,7 +253,7 @@ public class SongsPanel extends JPanel {
 					}
 				}
 			}
-			table.revalidate();
+			tblSongsTable.revalidate();
 			pnlControls.updateControlButtons();
 		}
 	}

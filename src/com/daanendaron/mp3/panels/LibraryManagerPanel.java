@@ -18,24 +18,23 @@ import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.daanendaron.mp3.Main;
-import com.daanendaron.mp3.MyTableModel;
+import com.daanendaron.mp3.CheckboxTableModel;
 import com.daanendaron.mp3.SQLite;
 import com.daanendaron.mp3.utilities.Utils;
 
 @SuppressWarnings("serial")
 public class LibraryManagerPanel extends JPanel {
 
-	private SQLite sql;
+	private SQLite sqlLiteFile;
 	private Main main;
 
 	public LibraryManagerPanel(Main main) {
 		this.main = main;
 
-		File mp3Folder = new File(System.getProperty("user.home")
-				+ (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "/Library/Application Support") + "/MP3/");
+		File mp3Folder = new File(System.getProperty("user.home") + (System.getProperty("os.name").startsWith("Windows") ? "/AppData/Roaming" : "/Library/Application Support") + "/MP3/");
 
-		sql = new SQLite(new File(mp3Folder, "/filelocations.sql"));
-		sql.executeUpdate("CREATE TABLE IF NOT EXISTS filelocations(path varchar(255));");
+		sqlLiteFile = new SQLite(new File(mp3Folder, "/filelocations.sql"));
+		sqlLiteFile.executeUpdate("CREATE TABLE IF NOT EXISTS filelocations(path varchar(255));");
 
 		setSize(1000, 700);
 		setVisible(true);
@@ -70,25 +69,29 @@ public class LibraryManagerPanel extends JPanel {
 		jspTableScrollPane.setSize(pnlTablePanel.getPreferredSize());
 		jspTableScrollPane.getViewport().setBackground(Color.white);
 
-		final MyTableModel model = new MyTableModel();
-		ResultSet result = sql.executeQuery("select * from filelocations");
+		final CheckboxTableModel model = new CheckboxTableModel();
+		ResultSet result = sqlLiteFile.executeQuery("select * from filelocations");
 		try {
 			while (result.next()) {
 				File fileLocation = new File(result.getString("path"));
-				model.addRow(new Object[] { false, fileLocation.getAbsolutePath() });
-				if (fileLocation.isDirectory()) {
-					for (File song : fileLocation.listFiles(new FilenameFilter() {
+				if (fileLocation.exists()) {
+					model.addRow(new Object[] { false, fileLocation.getAbsolutePath() });
+					if (fileLocation.isDirectory()) {
+						for (File song : fileLocation.listFiles(new FilenameFilter() {
 
-						@Override
-						public boolean accept(File dir, String name) {
-							String extension = name.substring(name.lastIndexOf('.') + 1, name.length());
-							return Main.supportedFormats.contains(extension.toLowerCase());
+							@Override
+							public boolean accept(File dir, String name) {
+								String extension = name.substring(name.lastIndexOf('.') + 1, name.length());
+								return Main.supportedFormats.contains(extension.toLowerCase());
+							}
+						})) {
+							main.pnlSongs.addSongToTable(song, true);
 						}
-					})) {
-						main.pnlSongs.addSong(song, true);
+					} else {
+						main.pnlSongs.addSongToTable(fileLocation, false);
 					}
 				} else {
-					main.pnlSongs.addSong(fileLocation, false);
+					sqlLiteFile.executeUpdate("DELETE FROM filelocations WHERE path='" + result.getString("path") + "';");
 				}
 			}
 		} catch (SQLException e) {
@@ -155,9 +158,8 @@ public class LibraryManagerPanel extends JPanel {
 		add(pnlMainPanel);
 	}
 
-	public JFileChooser initfilechooser(JFrame folderselectorframe) {
-		FileNameExtensionFilter audiofiles = new FileNameExtensionFilter("Audio Files",
-				Main.supportedFormats.toArray(new String[Main.supportedFormats.size()]));
+	public JFileChooser initFileChooser(JFrame folderselectorframe) {
+		FileNameExtensionFilter audiofiles = new FileNameExtensionFilter("Audio Files", Main.supportedFormats.toArray(new String[Main.supportedFormats.size()]));
 		JFileChooser mp3folderselector = new JFileChooser(System.getProperty("user.home") + System.getProperty("file.separator") + "Music");
 		mp3folderselector.setControlButtonsAreShown(true);
 		mp3folderselector.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -172,9 +174,9 @@ public class LibraryManagerPanel extends JPanel {
 	}
 
 	public void btnAddEvents(JTable tblDirectoriesTable) {
-		MyTableModel model = (MyTableModel) tblDirectoriesTable.getModel();
+		CheckboxTableModel model = (CheckboxTableModel) tblDirectoriesTable.getModel();
 		JFrame filechoserframe = new JFrame();
-		JFileChooser mp3choser = initfilechooser(filechoserframe);
+		JFileChooser mp3choser = initFileChooser(filechoserframe);
 		filechoserframe.add(mp3choser);
 		int i = mp3choser.showSaveDialog(getParent());
 		if (i == JFileChooser.APPROVE_OPTION) {
@@ -189,7 +191,7 @@ public class LibraryManagerPanel extends JPanel {
 			// add the directory to the table and the text file
 			File chosenFile = mp3choser.getSelectedFile();
 			model.addRow(new Object[] { false, mp3choser.getSelectedFile().getAbsolutePath() });
-			sql.executeUpdate("INSERT INTO filelocations(path) VALUES('" + chosenFile.getAbsolutePath() + "');");
+			sqlLiteFile.executeUpdate("INSERT INTO filelocations(path) VALUES('" + chosenFile.getAbsolutePath() + "');");
 			if (chosenFile.isDirectory()) {
 				for (File song : chosenFile.listFiles(new FilenameFilter() {
 
@@ -199,10 +201,10 @@ public class LibraryManagerPanel extends JPanel {
 						return Main.supportedFormats.contains(extension.toLowerCase());
 					}
 				})) {
-					main.pnlSongs.addSong(song, true);
+					main.pnlSongs.addSongToTable(song, true);
 				}
 			} else {
-				main.pnlSongs.addSong(chosenFile, false);
+				main.pnlSongs.addSongToTable(chosenFile, false);
 			}
 		} else {
 			filechoserframe.dispose();
@@ -213,9 +215,9 @@ public class LibraryManagerPanel extends JPanel {
 		for (int i = tblDirectoriesTable.getModel().getRowCount() - 1; i >= 0; i--) {
 			if ((boolean) tblDirectoriesTable.getModel().getValueAt(i, 0)) {
 				File fileLocation = new File((String) tblDirectoriesTable.getModel().getValueAt(i, 1));
-				((MyTableModel) tblDirectoriesTable.getModel()).removeRow(i);
-				sql.executeUpdate("DELETE FROM filelocations WHERE path='" + fileLocation.getAbsolutePath() + "';");
-				main.pnlSongs.removeSong(fileLocation);
+				((CheckboxTableModel) tblDirectoriesTable.getModel()).removeRow(i);
+				sqlLiteFile.executeUpdate("DELETE FROM filelocations WHERE path='" + fileLocation.getAbsolutePath() + "';");
+				main.pnlSongs.removeSongFromTable(fileLocation);
 				break;
 			}
 		}

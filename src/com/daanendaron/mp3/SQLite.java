@@ -9,24 +9,24 @@ import java.sql.Statement;
 
 public class SQLite {
 
-	private Connection c = null;
+	private Connection sqliteConnection = null;
 
 	public SQLite(File file) {
 		try {
 			Class.forName("org.sqlite.JDBC");
-			c = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+			sqliteConnection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public Connection getConnection() {
-		return c;
+		return sqliteConnection;
 	}
 
 	public int executeUpdate(String update) {
 		try {
-			Statement statement = c.createStatement();
+			Statement statement = sqliteConnection.createStatement();
 			return statement.executeUpdate(update);
 		} catch (SQLException e) {
 			System.err.println("Error while executing update: " + e.getMessage());
@@ -36,7 +36,7 @@ public class SQLite {
 
 	public ResultSet executeQuery(String query) {
 		try {
-			Statement statement = c.createStatement();
+			Statement statement = sqliteConnection.createStatement();
 			return statement.executeQuery(query);
 		} catch (SQLException e) {
 			System.err.println("Error while executing query: " + e.getMessage());
